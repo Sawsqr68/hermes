@@ -28,9 +28,40 @@ function test(description, fn) {
 }
 
 function assertEqual(actual, expected, message) {
-  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+  if (!deepEqual(actual, expected)) {
     throw new Error(`${message || 'Assertion failed'}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
+}
+
+function deepEqual(a, b) {
+  // Handle primitives and null
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+  
+  // Handle arrays
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  
+  // Handle arrays vs objects mismatch
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  
+  // Handle objects
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  
+  for (let key of keysA) {
+    if (!keysB.includes(key)) return false;
+    if (!deepEqual(a[key], b[key])) return false;
+  }
+  
+  return true;
 }
 
 function assertUndefined(actual, message) {
